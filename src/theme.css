@@ -1,0 +1,101 @@
+/* 画面の「見た目」：四角い世界のゲームらしく、石のボタンと灰色のパネル、ドットの字。
+   ドットの字は DotGothic16（Google Fonts、SIL OFL）。読めなければ丸ゴシックで出す。 */
+:root {
+  --ink: #3a3a3a;
+  --paper: #c6c6c6;
+  --accent: #ffd34a;
+  --potato: #e8bd6a;
+  --shade: rgba(10, 12, 20, 0.5);
+  --font: 'DotGothic16', 'Hiragino Maru Gothic ProN', 'M PLUS Rounded 1c', system-ui, sans-serif;
+}
+html, body { background: #000; color: var(--ink); font: 16px/1.5 var(--font); }
+#loading { background: #3b2a1c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%23593f2a'/%3E%3Crect x='4' y='6' width='4' height='4' fill='%236e4c33'/%3E%3Crect x='20' y='14' width='4' height='4' fill='%234b3423'/%3E%3Crect x='10' y='24' width='4' height='4' fill='%236e4c33'/%3E%3Crect x='26' y='2' width='4' height='4' fill='%234b3423'/%3E%3C/svg%3E") repeat;
+  image-rendering: pixelated; color: #fff; text-shadow: 2px 2px 0 #000; }
+
+/* 石のボタン：明るい上と左、暗い下と右（立体のふち）。選んでいるときは白いふち */
+button { font: inherit; color: #fff; text-shadow: 2px 2px 0 #3a3a3a; background: #7a7a7a; border: 2px solid #000; border-radius: 0;
+  padding: 0.5em 1.4em; min-width: 14em; cursor: pointer; letter-spacing: 0.04em;
+  box-shadow: inset 2px 2px 0 #aaaaaa, inset -2px -3px 0 #4e4e4e; }
+button:hover, button.gp-focus { background: #7d88c4; box-shadow: inset 2px 2px 0 #b7c0ef, inset -2px -3px 0 #4a5390; outline: 2px solid #fff; outline-offset: -2px; }
+button:active { box-shadow: inset 2px 3px 0 #4e4e4e; }
+.gp-focus { outline: 2px solid #fff; }
+input[type="range"] { width: 10em; accent-color: #7d88c4; }
+select { font: inherit; padding: 0.15em 0.4em; border-radius: 0; border: 2px solid #3a3a3a; background: #e8e8e8; color: #222; }
+
+/* タイトル */
+#title { gap: 0.3em; }
+#title::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 80%; transform: translateY(-58%);
+  background: radial-gradient(ellipse at center, rgba(10, 20, 40, 0.35), rgba(10, 20, 40, 0) 70%); pointer-events: none; }
+#title .logo { position: relative; margin-bottom: 0.1em; }
+#title h1 { margin: 0; font-size: clamp(30px, 7.4vw, 76px); font-weight: 400; color: var(--potato); text-align: center; line-height: 1.15; letter-spacing: 0.04em;
+  text-shadow: 3px 0 0 #4a2f14, -3px 0 0 #4a2f14, 0 3px 0 #4a2f14, 0 -3px 0 #4a2f14, 3px 3px 0 #4a2f14, -3px 3px 0 #4a2f14, 3px -3px 0 #4a2f14, -3px -3px 0 #4a2f14, 6px 7px 0 rgba(0, 0, 0, 0.45); }
+#title .splash { position: absolute; right: -0.6em; top: -0.7em; transform: rotate(-12deg); color: #ffff55; font-size: clamp(14px, 2.4vw, 24px);
+  text-shadow: 2px 2px 0 #3f3f00; white-space: nowrap; pointer-events: none; }
+#title .tagline { margin: 0.4em 0 1em; color: #fff; text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.7); font-size: clamp(14px, 2vw, 18px); }
+#title .menu { gap: 0.5em; }
+#title .best { margin: 0.6em 0 0; color: #ffe8a0; text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.7); font-size: 14px; min-height: 1.5em; }
+#title .copyright { font-size: 12px; color: rgba(255, 255, 255, 0.92); text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8); letter-spacing: 0.04em; }
+
+/* 重なる画面：灰色のパネル */
+.modal { background: var(--shade); }
+.card { background: var(--paper); border: 3px solid #000; border-radius: 0; padding: 1em 1.2em; gap: 0.55em;
+  box-shadow: inset 3px 3px 0 #ffffff, inset -3px -3px 0 #555555, 0 10px 40px rgba(0, 0, 0, 0.45); }
+.card.wide, .card.story, .card.ending { width: min(34em, 100%); }
+.card h2 { margin: 0 0 0.2em; text-align: center; font-weight: 400; font-size: 1.35em; color: #3a3a3a; }
+.card button { min-width: 0; }
+.card .row { color: #3a3a3a; }
+.card .body { margin: 0; font-size: 0.92em; line-height: 1.7; }
+.keys { margin: 0.3em 0 0.6em; font-size: 0.92em; }
+.touchonly { display: none; }
+[data-device="touch"] .touchonly { display: block; }
+[data-device="touch"] .card .keys { display: none; }
+
+/* これまでのこと */
+.story-body { background: #1e1e26; color: #e8e8e8; padding: 0.8em 1em; border: 2px solid #555; line-height: 1.8; font-size: 0.95em; }
+.story-body p { margin: 0.25em 0; }
+.story-body p:nth-child(4) { color: #8fd870; }
+.story-body p:last-child { color: var(--potato); }
+
+/* 報告・おわり */
+.r-stats { display: grid; gap: 0.35em; background: #8b8b8b; padding: 0.6em; border: 2px solid #555; box-shadow: inset 2px 2px 0 #373737, inset -2px -2px 0 #fff; }
+.r-stats .st { display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 0.6em; color: #fff; text-shadow: 1px 1px 0 #333; }
+.r-stats img { width: 28px; height: 28px; image-rendering: pixelated; }
+.r-stats b { font-weight: 400; font-size: 1.3em; color: #ffff7a; }
+.r-stats .boom, .r-stats .star { width: 28px; height: 28px; display: block; }
+.r-stats .boom { background: radial-gradient(circle, #fff6c0 0 20%, #ffb040 21% 45%, #8a8a8a 46% 70%, transparent 71%); }
+.r-stats .star { background: #ffd34a; clip-path: polygon(50% 0, 62% 36%, 100% 38%, 70% 60%, 80% 100%, 50% 76%, 20% 100%, 30% 60%, 0 38%, 38% 36%); }
+.r-goal { margin: 0.2em 0 0; text-align: center; color: #6a4a2a; }
+.r-goal.ok { color: #2e7d22; font-size: 1.15em; }
+.r-line, .e-lines p { margin: 0; background: rgba(0, 0, 0, 0.72); color: #fff; padding: 0.5em 0.7em; font-size: 0.92em; }
+.e-lines { display: grid; gap: 0.25em; }
+.who { color: #8ff4ff; }
+.e-rank { margin: 0; text-align: center; font-size: 1.6em; color: #7a4a10; }
+.e-rank small { display: block; font-size: 0.5em; color: #555; }
+.e-best { margin: 0; text-align: center; color: #555; }
+.e-best.new { color: #c03a1a; font-size: 1.15em; }
+
+/* ボタンの絵 */
+.gl { background: rgba(20, 20, 28, 0.85); color: #fff; border-radius: 3px; }
+.card .gl { background: #3a3a46; }
+.gl-mouse { padding: 0 0.15em; }
+.gl-or { margin: 0 0.15em; opacity: 0.7; }
+
+/* タッチ操作 */
+#touch .stick { background: rgba(255, 255, 255, 0.16); border: 2px solid rgba(255, 255, 255, 0.45); opacity: 0.55; }
+#touch .stick.on { opacity: 1; }
+#touch .knob { background: rgba(255, 255, 255, 0.75); }
+#touch .tbtn { background: rgba(120, 120, 120, 0.72); color: #fff; font-size: 13px; text-shadow: 1px 1px 0 #333; border: 2px solid #000; border-radius: 10px;
+  box-shadow: inset 2px 2px 0 rgba(255, 255, 255, 0.4), inset -2px -2px 0 rgba(0, 0, 0, 0.3); min-width: 0; padding: 0 4px; line-height: 1.2; }
+#touch .tbtn.slot-0 { background: rgba(170, 80, 70, 0.8); }
+#touch .tbtn.slot-1 { background: rgba(90, 140, 70, 0.8); }
+#touch .tbtn.ctx { background: rgba(214, 160, 70, 0.92); }
+#touch .tbtn.on { background: #7d88c4; }
+#touch .tbtn.pause { font-size: 16px; border-radius: 8px; }
+
+@media (max-height: 480px) {
+  #title h1 { font-size: clamp(26px, 7vh, 48px); }
+  #title .tagline { margin: 0.2em 0 0.4em; }
+  #title .menu { gap: 0.3em; }
+  #title .best { margin: 0.2em 0 0; }
+  button { padding: 0.35em 1.2em; }
+}

@@ -1,0 +1,121 @@
+/* ゲーム中の表示（GameHud.js）。濃さの出し入れは JS がゲームの時間で動かす（ここでは transition を使わない）。 */
+#hud { font-family: var(--font); color: #fff; text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.75); font-size: 15px; }
+#hud img { image-rendering: pixelated; }
+
+/* 照準と、狙っているものでできること */
+#hud .crosshair { position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; transform: translate(-50%, -50%); mix-blend-mode: difference; }
+#hud .crosshair::before, #hud .crosshair::after { content: ''; position: absolute; background: #fff; }
+#hud .crosshair::before { left: 10px; top: 0; width: 2px; height: 22px; }
+#hud .crosshair::after { left: 0; top: 10px; width: 22px; height: 2px; }
+#hud .prompt { position: absolute; left: 50%; top: calc(50% + 26px); transform: translateX(-50%); display: flex; align-items: center; gap: 0.35em;
+  background: rgba(0, 0, 0, 0.5); padding: 0.15em 0.6em; font-size: 14px; white-space: nowrap; }
+#hud .prompt b { font-weight: 400; }
+#hud .prompt.dim { background: rgba(0, 0, 0, 0.35); color: #d8d8d8; }
+#hud .prompt.dim b { color: #ffe8a0; }
+
+/* 左上：日付・時計・目標・やること */
+#hud .tl { position: absolute; top: calc(10px + var(--safe-t)); left: calc(12px + var(--safe-l)); display: grid; gap: 4px; max-width: min(46vw, 22em); }
+#hud .tl > div { background: rgba(0, 0, 0, 0.45); padding: 0.25em 0.6em; }
+#hud .day { display: flex; align-items: center; gap: 0.5em; }
+#hud .sunmoon { width: 16px; height: 16px; flex: none; }
+#hud .sunmoon.sun { background: #ffe25a; box-shadow: 0 0 0 2px #fff4b0; }
+#hud .sunmoon.moon { background: #e6ecff; box-shadow: inset -5px 0 0 #9aa6c8; }
+#hud .day b { font-weight: 400; font-size: 1.1em; }
+#hud .clock { flex: 1; min-width: 4em; height: 6px; background: rgba(255, 255, 255, 0.2); position: relative; }
+#hud .clock i { position: absolute; left: 0; top: 0; bottom: 0; background: #ffd34a; }
+#hud .goal { display: grid; grid-template-columns: auto 1fr; column-gap: 0.6em; align-items: center; }
+#hud .goal .lbl { font-size: 0.85em; color: #ddd; }
+#hud .goal b { font-weight: 400; justify-self: end; font-size: 1.1em; color: #ffe8a0; }
+#hud .goal .bar { grid-column: 1 / -1; height: 5px; background: rgba(255, 255, 255, 0.18); margin-top: 2px; position: relative; }
+#hud .goal .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--potato); }
+#hud .goal.done b { color: #9cff7a; }
+#hud .goal.done .bar i { background: #7ad85a; }
+#hud .obj { font-size: 0.88em; color: #ffff7a; line-height: 1.45; }
+
+/* 右上：アストラの様子 */
+#hud .robot { position: absolute; top: calc(10px + var(--safe-t)); right: calc(12px + var(--safe-r)); display: flex; align-items: center; gap: 0.5em;
+  background: rgba(0, 0, 0, 0.45); padding: 0.3em 0.7em 0.3em 0.35em; }
+#hud .robot canvas { width: 48px; height: 36px; image-rendering: pixelated; border: 3px solid #e9e5db; background: #152038; }
+#hud .robot .rtext { display: grid; line-height: 1.25; }
+#hud .robot b { font-weight: 400; color: #8ff4ff; }
+#hud .robot .rstate { font-size: 0.85em; }
+#hud .robot[data-s="scared"] .rstate { color: #ff8a7a; }
+#hud .robot[data-s="sulk"] .rstate { color: #9fb4d8; }
+#hud .robot[data-s="sleep"] .rstate { color: #b8b8e8; }
+#hud .robot[data-s="work"] .rstate { color: #b8ff9a; }
+
+/* 左下：チャット */
+#hud .chat { position: absolute; left: calc(12px + var(--safe-l)); bottom: calc(108px + var(--safe-b)); width: min(40em, 58vw); display: flex; flex-direction: column; gap: 2px; }
+#hud .chat .line { background: rgba(0, 0, 0, 0.5); padding: 0.1em 0.5em; font-size: 14px; line-height: 1.5; text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.9); }
+#hud .chat .who { color: #8ff4ff; }
+#hud .chat .sys { color: #ffff7a; }
+#hud .chat .warn { color: #8fff6a; }
+
+/* 下：体力と持ち物 */
+#hud .bottom { position: absolute; left: 50%; bottom: calc(10px + var(--safe-b)); transform: translateX(-50%); display: grid; justify-items: start; gap: 2px; }
+#hud .bottom .hearts { justify-self: start; }
+#hud .hearts { display: flex; gap: 0; }
+#hud .hearts img { width: 22px; height: 22px; margin-right: -2px; }
+#hud .hearts.low img { filter: drop-shadow(0 0 2px rgba(255, 60, 60, 0.9)); }
+#hud .hotbar { display: flex; background: rgba(40, 40, 40, 0.8); border: 2px solid #111; padding: 2px; gap: 2px; }
+#hud .slot { position: relative; width: 46px; height: 46px; background: rgba(139, 139, 139, 0.55); border: 2px solid #373737; display: grid; place-items: center;
+  box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.35), inset -2px -2px 0 rgba(255, 255, 255, 0.25); }
+#hud .slot.sel { border-color: #fff; outline: 2px solid #fff; z-index: 1; }
+#hud .slot img { width: 34px; height: 34px; }
+#hud .slot span { position: absolute; right: 2px; bottom: -2px; font-size: 15px; text-shadow: 2px 2px 0 #3a3a3a; }
+#hud .slot.empty img { opacity: 0.35; }
+#hud .slot.empty span { color: #ffb0b0; }
+#hud .slot[data-k="green"].empty { display: none; }
+#hud .slot.extra { margin-left: 4px; }
+#hud .slot[data-n] { pointer-events: auto; cursor: pointer; }
+#hud .slot em { position: absolute; left: 3px; top: 0; font-style: normal; font-size: 11px; color: #e8e8e8; text-shadow: 1px 1px 0 #222; }
+[data-device="touch"] #hud .slot em, [data-device="pad"] #hud .slot em { display: none; }
+#hud .hb-side { display: none; align-self: center; font-style: normal; }
+[data-device="pad"] #hud .hb-side { display: inline-flex; margin: 0 4px; }
+#hud .slotname { position: absolute; left: -40px; right: -40px; top: -48px; text-align: center; opacity: 0; font-size: 15px; color: #fff; pointer-events: none; }
+
+/* 右下：操作の案内 */
+#hud .hints { position: absolute; right: calc(12px + var(--safe-r)); bottom: calc(12px + var(--safe-b)); left: auto; display: grid; gap: 4px; justify-items: end; font-size: 13px; }
+#hud .hints span { display: flex; align-items: center; gap: 0.35em; white-space: nowrap; background: rgba(0, 0, 0, 0.35); padding: 0.05em 0.45em; }
+#hud .hints b { font-weight: 400; }
+#hud .hints i, #hud .prompt .pg { display: inline-flex; align-items: center; white-space: nowrap; font-style: normal; }
+[data-device="touch"] #hud .hints { display: none; }
+
+/* 真ん中上の見出し */
+#hud .banner { position: absolute; left: 0; right: 0; top: 22%; text-align: center; opacity: 0; pointer-events: none; }
+#hud .banner h2 { margin: 0; font-weight: 400; font-size: clamp(30px, 6vw, 56px); color: #fff; text-shadow: 3px 3px 0 #3a3a3a; }
+#hud .banner p { margin: 0.2em 0 0; font-size: clamp(14px, 2.2vw, 20px); color: #ffe8a0; }
+#hud .deadmsg { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; background: rgba(120, 0, 0, 0.25); }
+#hud .deadmsg h2 { margin: 0; font-weight: 400; font-size: clamp(32px, 6vw, 60px); }
+#hud .deadmsg p { margin: 0.3em 0 0; color: #ffe8a0; }
+
+/* 画面の外の緑のアレ */
+#hud .arrows { position: absolute; inset: 0; pointer-events: none; }
+#hud .arrow { position: absolute; width: 0; height: 0; }
+#hud .arrow i { position: absolute; left: -12px; top: -14px; width: 24px; height: 28px; background: #6ad84a; clip-path: polygon(50% 0, 100% 100%, 50% 75%, 0 100%);
+  filter: drop-shadow(0 0 2px #000); }
+#hud .arrow.fuse i { background: #ff5a3a; }
+#hud .arrow.big i { transform: scale(1.5); }
+
+/* ダメージ */
+#hud .hurt { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse at center, rgba(255, 0, 0, 0) 45%, rgba(200, 0, 0, 0.55) 100%); }
+
+/* スマホ：ボタンとスティックをよけて、持ち物を上へ、チャットを左上へ */
+[data-device="touch"] #hud .bottom { bottom: calc(228px + var(--safe-b)); }
+[data-device="touch"] #hud .slot { width: 44px; height: 44px; }
+[data-device="touch"] #hud .slot img { width: 30px; height: 30px; }
+[data-device="touch"] #hud .hearts img { width: 18px; height: 18px; }
+[data-device="touch"] #hud .robot { top: calc(64px + var(--safe-t)); }
+[data-device="touch"] #hud .chat { bottom: auto; top: calc(168px + var(--safe-t)); right: auto; width: min(26em, 64vw); }
+[data-device="touch"] #hud .chat .line { font-size: 12px; }
+[data-device="touch"] #hud { font-size: 13px; }
+@media (orientation: landscape) and (max-height: 500px) {
+  [data-device="touch"] #hud .bottom { bottom: calc(8px + var(--safe-b)); }
+  [data-device="touch"] #hud .robot { top: calc(8px + var(--safe-t)); right: calc(70px + var(--safe-r)); }
+  [data-device="touch"] #hud .chat { top: auto; bottom: calc(150px + var(--safe-b)); width: min(24em, 40vw); }
+  [data-device="touch"] #hud .tl { max-width: 30vw; }
+}
+@media (max-width: 700px) {
+  #hud .robot canvas { width: 36px; height: 27px; }
+  #hud .chat { width: 80vw; }
+}
